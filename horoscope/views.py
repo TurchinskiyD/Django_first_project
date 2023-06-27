@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 
 zodiac_dict = {
     "aries": "Знак зодіаку Овен. March 21 — April 20. Овна потрібно обіймати, коли він не посміхається, цілувати, коли тупить, і годувати, коли в нього істерика.",
@@ -16,9 +16,17 @@ zodiac_dict = {
 }
 
 
-def get_info_about_zodiac(request, sign_zodiac):
+def get_info_about_zodiac(request, sign_zodiac: str):
     description = zodiac_dict.get(sign_zodiac)
     if description:
         return HttpResponse(description)
     else:
         return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
+
+
+def get_info_about_zodiac_by_number(request, sign_zodiac: int):
+    zodiacs = list(zodiac_dict)
+    if sign_zodiac > len(zodiacs):
+        return HttpResponseNotFound(f"Було передано невірний порядковий номер знаку зодіаку {sign_zodiac}")
+    name_zodiac = zodiacs[sign_zodiac-1]
+    return HttpResponseRedirect(f'/horoscope/{name_zodiac}/')
