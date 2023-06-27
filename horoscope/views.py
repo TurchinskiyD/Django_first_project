@@ -1,47 +1,24 @@
-
 from django.http import HttpResponse, HttpResponseNotFound
+
+zodiac_dict = {
+    "aries": "Знак зодіаку Овен. March 21 — April 20. Овна потрібно обіймати, коли він не посміхається, цілувати, коли тупить, і годувати, коли в нього істерика.",
+    "taurus": "Знак зодіаку Телець. April 21 — May 22. Щастя для Тельця — це багато подорожувати, смачно їсти і бути з коханою людиною",
+    "gemini": "Знак зодіаку Близнюки. May 23 — June 21. Якщо Близнюки вирішать зробити когось щасливим, то людину вже ніщо не врятує!",
+    "cancer": "Знак зодіаку Рак. June 22 — July 22. Коли терпінню Раків настає межа, тоді починається повне беззаконня.",
+    "leo": "Знак зодіаку Лев. July 23 — August 22. Міцний характер Левів, як правило, будується з цегли, яку в нього кидали.",
+    "virgo": "Знак зодіаку Діва. August 23 — September 22. Найкраще закінчення суперечки з Дівою — прикинутися мертвим.",
+    "libra": "Знак зодіаку Терези. September 23 — October 22. У всіх Терезів є два життя: одне бачать всі ті, хто їх оточує, іншим живуть вони одні.",
+    "scorpion": "Знак зодіаку Скорпіон. October 23 — November 21. Скорпіони — це ті люди, яким вкрай необхідно знайти баланс між спокоєм і високим ступенем активності.",
+    "sagittarius": "Знак зодіаку Стрілець. November 22 — December 22. 99% Стрільців були народжені для того, щоб основним сенсом їхнього існування так чи інакше стала дорога.",
+    "capricorn": "Знак зодіаку Козеріг. December 23 — January 20. Козероги люблять дивних людей.",
+    "aquarius": "Знак зодіаку Водолій. January 21 — February 19. Водолії не дивуються чиїмось дивацтвам… Вони і свої-то не завжди пояснити можуть.",
+    "pisces": "Знак зодіаку Риби. February 20 — March 20. Добре, що думки Риб ніхто не може читати, а то образ сором’язливих людей полетів би до біса."
+}
 
 
 def get_info_about_zodiac(request, sign_zodiac):
-    if sign_zodiac == "aries":
-        return HttpResponse("Знак зодіаку Овен. March 21 — April 20. Овна потрібно обіймати, коли він не посміхається, цілувати, коли тупить, і годувати, коли в нього істерика.")
-    elif sign_zodiac == "taurus":
-        return HttpResponse("Знак зодіаку Телець. April 21 — May 22. Щастя для Тельця — це багато подорожувати, смачно їсти і бути з коханою людиною")
-    elif sign_zodiac == "gemini":
-        return HttpResponse("Знак зодіаку Близнюки. May 23 — June 21. Якщо Близнюки вирішать зробити когось щасливим, то людину вже ніщо не врятує!")
-    elif sign_zodiac == "cancer":
-        return HttpResponse("Знак зодіаку Рак. June 22 — July 22. Коли терпінню Раків настає межа, тоді починається повне беззаконня.")
+    description = zodiac_dict.get(sign_zodiac)
+    if description:
+        return HttpResponse(description)
     else:
-        return HttpResponseNotFound(f"Невідомий знак зодіаку - {sign_zodiac}")
-#
-#
-# def leo(request):
-#     return HttpResponse("Знак зодіаку Лев. July 23 — August 22")
-#
-#
-# def virgo(request):
-#     return HttpResponse("Знак зодіаку Діва. August 23 — September 22")
-#
-#
-# def libra(request):
-#     return HttpResponse("Знак зодіаку Терези. September 23 — October 22")
-#
-#
-# def scorpion(request):
-#     return HttpResponse("Знак зодіаку Скорпіон. October 23 — November 21")
-#
-#
-# def sagittarius(request):
-#     return HttpResponse("Знак зодіаку Стрілець. November 22 — December 22")
-#
-#
-# def capricorn(request):
-#     return HttpResponse("Знак зодіаку Козоріг. December 23 — January 20")
-#
-#
-# def aquarius(request):
-#     return HttpResponse("Знак зодіаку Водолій. January 21 — February 19")
-#
-#
-# def pisces(request):
-#     return HttpResponse("Знак зодіаку Риби. February 20 — March 20")
+        return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
