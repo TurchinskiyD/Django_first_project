@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.urls import reverse
 
 zodiac_dict = {
     "aries": "Знак зодіаку Овен. March 21 — April 20. Овна потрібно обіймати, коли він не посміхається, цілувати, коли тупить, і годувати, коли в нього істерика.",
@@ -16,10 +17,25 @@ zodiac_dict = {
 }
 
 
+def index(request):
+    zodiacs = list(zodiac_dict)
+    li_elements = ''
+    for sign in zodiacs:
+        redirect_path = reverse('horoscope_name', args=[sign])
+        li_elements += f"<li><a href='{redirect_path}'>{sign.title()}</a></li>"
+
+    response = f"""
+    <ul>
+        {li_elements}
+    </ul>
+    """
+    return HttpResponse(response)
+
+
 def get_info_about_zodiac(request, sign_zodiac: str):
     description = zodiac_dict.get(sign_zodiac)
     if description:
-        return HttpResponse(description)
+        return HttpResponse(f'<h3>{description}</h3>')
     else:
         return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
 
@@ -28,5 +44,6 @@ def get_info_about_zodiac_by_number(request, sign_zodiac: int):
     zodiacs = list(zodiac_dict)
     if sign_zodiac > len(zodiacs):
         return HttpResponseNotFound(f"Було передано невірний порядковий номер знаку зодіаку {sign_zodiac}")
-    name_zodiac = zodiacs[sign_zodiac-1]
-    return HttpResponseRedirect(f'/horoscope/{name_zodiac}/')
+    name_zodiac = zodiacs[sign_zodiac - 1]
+    redirect_url = reverse('horoscope_name', args=[name_zodiac])
+    return HttpResponseRedirect(redirect_url)
