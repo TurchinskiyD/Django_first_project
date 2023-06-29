@@ -1,5 +1,9 @@
 import calendar
+from dataclasses import dataclass
 from datetime import datetime
+
+from django.shortcuts import render
+from django.template.loader import render_to_string
 
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
@@ -9,7 +13,7 @@ zodiac_dict = {
     "taurus": "Знак зодіаку Телець. April 21 — May 22. Щастя для Тельця — це багато подорожувати, смачно їсти і бути з коханою людиною",
     "gemini": "Знак зодіаку Близнюки. May 23 — June 21. Якщо Близнюки вирішать зробити когось щасливим, то людину вже ніщо не врятує!",
     "cancer": "Знак зодіаку Рак. June 22 — July 22. Коли терпінню Раків настає межа, тоді починається повне беззаконня.",
-    "leo": "Знак зодіаку Лев. July 23 — August 22. Міцний характер Левів, як правило, будується з цегли, яку в нього кидали.",
+    "leo": "Знак зодіаку Лев. July 23 — August 22. <i>Міцний характер Левів</i>, як правило, будується з цегли, яку в нього кидали.",
     "virgo": "Знак зодіаку Діва. August 23 — September 22. Найкраще закінчення суперечки з Дівою — прикинутися мертвим.",
     "libra": "Знак зодіаку Терези. September 23 — October 22. У всіх Терезів є два життя: одне бачать всі ті, хто їх оточує, іншим живуть вони одні.",
     "scorpion": "Знак зодіаку Скорпіон. October 23 — November 21. Скорпіони — це ті люди, яким вкрай необхідно знайти баланс між спокоєм і високим ступенем активності.",
@@ -22,17 +26,10 @@ zodiac_dict = {
 
 def index(request):
     zodiacs = list(zodiac_dict)
-    li_elements = ''
-    for sign in zodiacs:
-        redirect_path = reverse('horoscope_name', args=[sign])
-        li_elements += f"<li><a href='{redirect_path}'>{sign.title()}</a></li>"
-
-    response = f"""
-    <ul>
-        {li_elements}
-    </ul>
-    """
-    return HttpResponse(response)
+    data = {
+        'zodiacs': zodiacs
+    }
+    return render(request, 'horoscope/index.html', context=data)
 
 
 def get_info_about_zodiac_by_number(request, sign_zodiac: int):
@@ -92,10 +89,14 @@ def get_info_about_zodiac_type(request, type_zodiac):
 
 def get_info_about_zodiac(request, sign_zodiac: str):
     description = zodiac_dict.get(sign_zodiac)
-    if description:
-        return HttpResponse(f'<h3>{description}</h3>')
-    else:
-        return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
+
+    data = {
+        'description_zodiac': description,
+        'sign': sign_zodiac
+    }
+
+    return render(request, 'horoscope/info_zodiac.html', context=data)
+
 
 zodiac_dict_date = {
     # Знаки зодіаку з місяцями та днями
@@ -112,7 +113,9 @@ zodiac_dict_date = {
     "aquarius": (1, 21, 2, 19),
     "pisces": (2, 20, 3, 20),
 }
-def get_info_by_date(request,month, day):
+
+
+def get_info_by_date(request, month, day):
     try:
         month = int(month)
         day = int(day)
@@ -128,7 +131,6 @@ def get_info_by_date(request,month, day):
     if not (1 <= day <= max_day):
         return HttpResponseNotFound(f'Такого дня - {day} не має в місяці - {month}')
 
-
     zodiac_sign = None
     for sign, (start_month, start_day, end_month, end_day) in zodiac_dict_date.items():
         if (month == start_month and day >= start_day) or (month == end_month and day <= end_day):
@@ -137,6 +139,7 @@ def get_info_by_date(request,month, day):
 
     if zodiac_sign:
         zodiac_info = zodiac_dict.get(zodiac_sign)
-        return HttpResponse(f'<h2>Місяць - {month}, день - {day}. Знак зодіаку: {zodiac_sign.title()}.</h2>{zodiac_info}')
+        return HttpResponse(
+            f'<h2>Місяць - {month}, день - {day}. Знак зодіаку: {zodiac_sign.title()}.</h2>{zodiac_info}')
     else:
         HttpResponseNotFound(f'Невідома дата - {month}/{day}')

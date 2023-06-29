@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, register_converter
 from .views import get_info_about_zodiac, get_info_about_zodiac_by_number, index, get_info_about_zodiac_type, \
     get_zodiac_elements, get_info_by_date
 
