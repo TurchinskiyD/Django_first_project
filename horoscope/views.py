@@ -1,3 +1,6 @@
+import calendar
+from datetime import datetime
+
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 
@@ -32,14 +35,6 @@ def index(request):
     return HttpResponse(response)
 
 
-def get_info_about_zodiac(request, sign_zodiac: str):
-    description = zodiac_dict.get(sign_zodiac)
-    if description:
-        return HttpResponse(f'<h3>{description}</h3>')
-    else:
-        return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
-
-
 def get_info_about_zodiac_by_number(request, sign_zodiac: int):
     zodiacs = list(zodiac_dict)
     if sign_zodiac > len(zodiacs):
@@ -47,3 +42,101 @@ def get_info_about_zodiac_by_number(request, sign_zodiac: int):
     name_zodiac = zodiacs[sign_zodiac - 1]
     redirect_url = reverse('horoscope_name', args=[name_zodiac])
     return HttpResponseRedirect(redirect_url)
+
+
+def get_zodiac_elements(request):
+    elements = ['fire', 'air', 'earth', 'water']
+
+    li_elements = ''
+    for element in elements:
+        redirect_path = reverse('horoscope_name', args=[element])
+        li_elements += f"<li><a href='{redirect_path}'>{element.title()}</a></li>"
+
+    response = f"""
+    <h3>Zodiac Elements:</h3>
+    <ul>
+        {li_elements}
+    </ul>
+    """
+    return HttpResponse(response)
+
+
+def get_info_about_zodiac_type(request, type_zodiac):
+    elements = {
+        'fire': ['aries', 'leo', 'sagittarius'],
+        'air': ['gemini', 'libra', 'aquarius'],
+        'earth': ['taurus', 'virgo', 'capricorn'],
+        'water': ['cancer', 'scorpion', 'pisces']
+    }
+    type_zodiac_lower = type_zodiac.lower()
+    if type_zodiac_lower in elements:
+        zodiacs = elements[type_zodiac.lower()]
+
+        li_elements = ''
+        for zodiac in zodiacs:
+            redirect_path = reverse('horoscope_name', args=[zodiac])
+            li_elements += f"<li><a href='{redirect_path}'>{zodiac.title()}</a></li>"
+
+        response = f"""
+        <h3>Zodiac Signs ({type_zodiac.title()}):</h3>
+        <ul>
+            {li_elements}
+        </ul>
+        """
+        return HttpResponse(response)
+    elif type_zodiac_lower in zodiac_dict:
+        return get_info_about_zodiac(request, type_zodiac_lower)
+    else:
+        return HttpResponseNotFound(f'Невідомий тип стихії - {type_zodiac}')
+
+
+def get_info_about_zodiac(request, sign_zodiac: str):
+    description = zodiac_dict.get(sign_zodiac)
+    if description:
+        return HttpResponse(f'<h3>{description}</h3>')
+    else:
+        return HttpResponseNotFound(f'Невідомий знак зодіаку - {sign_zodiac}')
+
+zodiac_dict_date = {
+    # Знаки зодіаку з місяцями та днями
+    "aries": (3, 21, 4, 20),
+    "taurus": (4, 21, 5, 20),
+    "gemini": (5, 21, 6, 20),
+    "cancer": (6, 21, 7, 22),
+    "leo": (7, 23, 8, 22),
+    "virgo": (8, 23, 9, 22),
+    "libra": (9, 23, 10, 22),
+    "scorpion": (10, 23, 11, 21),
+    "sagittarius": (11, 22, 12, 21),
+    "capricorn": (12, 22, 1, 20),
+    "aquarius": (1, 21, 2, 19),
+    "pisces": (2, 20, 3, 20),
+}
+def get_info_by_date(request,month, day):
+    try:
+        month = int(month)
+        day = int(day)
+    except ValueError:
+        return HttpResponseNotFound(f'Невірний формат дати - {month}/{day}')
+
+    if not (1 <= month <= 12):
+        return HttpResponseNotFound(f'Невірний номер місяця - {month}.')
+
+    year = datetime.now().year
+    _, max_day = calendar.monthrange(year, month)  # max_day = calendar.monthrange(year, month)[1]
+
+    if not (1 <= day <= max_day):
+        return HttpResponseNotFound(f'Такого дня - {day} не має в місяці - {month}')
+
+
+    zodiac_sign = None
+    for sign, (start_month, start_day, end_month, end_day) in zodiac_dict_date.items():
+        if (month == start_month and day >= start_day) or (month == end_month and day <= end_day):
+            zodiac_sign = sign
+            break
+
+    if zodiac_sign:
+        zodiac_info = zodiac_dict.get(zodiac_sign)
+        return HttpResponse(f'<h2>Місяць - {month}, день - {day}. Знак зодіаку: {zodiac_sign.title()}.</h2>{zodiac_info}')
+    else:
+        HttpResponseNotFound(f'Невідома дата - {month}/{day}')
